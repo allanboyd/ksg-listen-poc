@@ -3,9 +3,10 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Send, AlertTriangle, MessageSquare, Calendar, Globe, ArrowLeft, Menu, Mic } from "lucide-react";
+import MapCard from "@/components/MapCard";
 import { useSession } from "next-auth/react";
 
-type ChatItem = { id: string; me: string; ai?: string; results?: Array<{ title: string; source: string; summary?: string; keywords?: string[]; content?: string }>; suggestions?: string[] };
+type ChatItem = { id: string; me: string; ai?: string; results?: Array<{ title: string; source: string; summary?: string; keywords?: string[]; content?: string }>; suggestions?: string[]; map?: { selectedCampusId?: string; originText?: string } };
 type Mode = "menu" | "inquiry" | "info" | "feedback";
 
 const PROMPTS = [
@@ -138,7 +139,7 @@ export default function AssistantPage() {
       const res = await fetch("/api/chat", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ message: me, mode: modeParam }) });
       const data = await res.json().catch(()=>({}));
       const ai = data.reply || data.error || (!res.ok ? `API error: ${res.status}` : "No response received");
-      setItems((arr) => arr.map(m => m.id === id ? { ...m, ai, results: Array.isArray(data.results)? data.results : undefined, suggestions: Array.isArray(data.suggestions)? data.suggestions : undefined } : m));
+      setItems((arr) => arr.map(m => m.id === id ? { ...m, ai, results: Array.isArray(data.results)? data.results : undefined, suggestions: Array.isArray(data.suggestions)? data.suggestions : undefined, map: data && typeof data === 'object' ? data.map : undefined } : m));
       // Auto alert admins on urgent text
       if (/\burgent\b|\bemergency\b|\bcritical\b/i.test(me)) {
         fetch("/api/alerts", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Urgent user message", message: me, priority: "urgent" }) });
@@ -256,6 +257,14 @@ export default function AssistantPage() {
                 {it.ai && (
                   <div className="relative rounded-xl border p-5 min-h-16 bg-white space-y-3">
                     <div className="text-sm"><span className="font-medium">Assistant:</span> {it.ai}</div>
+                    {it.map && (
+                      <MapCard
+                        title="Map"
+                        description={it.map.originText ? "Directions to selected campus" : "Campuses locations"}
+                        selectedCampusId={it.map.selectedCampusId}
+                        origin={it.map.originText}
+                      />
+                    )}
                     {Array.isArray(it.results) && it.results.length>0 && (
                       <div className="grid sm:grid-cols-2 gap-3">
                         {it.results.map((r, idx)=> (

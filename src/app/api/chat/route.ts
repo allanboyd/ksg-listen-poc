@@ -198,6 +198,15 @@ export async function POST(req: NextRequest) {
         }
       }
       const contentFallback = retrievedSnippet || firstDocSnippet || websiteSnippet || "";
+      // Server-driven map payload detection (keywords + simple extraction)
+      const wantsMap = /\b(map|maps|geo|geomap|location|locate|directions?|route|routing|navigate|navigation|path|way|wayfinding|guide|guidance|google\s+maps?|where\s+is|show\s+(?:me\s+)?(?:on\s+the\s+)?map|how\s+do\s+i\s+get\s+to|nearby)\b/i.test(message);
+      const campusMatch = /(nairobi|mombasa|baringo|embu|matuga)/i.exec(message);
+      const selectedCampusId = campusMatch ? campusMatch[1].toLowerCase() : undefined;
+      // Try multiple origin patterns
+      const originMatch = /\bfrom\s+([^,;]+(?:,\s*[^,;]+)*)/i.exec(message)
+        || /\borigin\s*[:=-]\s*([^,;]+(?:,\s*[^,;]+)*)/i.exec(message)
+        || /\bstart(?:ing)?\s+at\s+([^,;]+(?:,\s*[^,;]+)*)/i.exec(message);
+      const originText = originMatch ? originMatch[1].trim() : undefined;
       const fallback = greeting
         ? menu
         : (contentFallback || "I couldn't find a good answer right now. You can choose: 1) Make inquiry (docs), 2) General information (website), or 3) Make feedback.");
@@ -213,7 +222,8 @@ export async function POST(req: NextRequest) {
         if (suggestionSet.size >= 12) break;
       }
       const suggestions = Array.from(suggestionSet).slice(0, 12);
-      return NextResponse.json({ reply: finalReply, results: retrieved.items.slice(0, 6), suggestions });
+      const map = wantsMap ? { selectedCampusId, originText } : undefined;
+      return NextResponse.json({ reply: finalReply, results: retrieved.items.slice(0, 6), suggestions, map });
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
       return NextResponse.json({

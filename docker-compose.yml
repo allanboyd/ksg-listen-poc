@@ -13,6 +13,7 @@ services:
         MAIL_PASSWORD: ${MAIL_PASSWORD}
         MAIL_FROM_ADDRESS: ${MAIL_FROM_ADDRESS}
         ALERT_TO: ${ALERT_TO}
+        NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: ${NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}
     container_name: ksg-next
     env_file:
       - .env.local
@@ -22,6 +23,7 @@ services:
       - HOSTNAME=0.0.0.0
       - DB_FILE=/app/data/app.db
       - KSG_INDEX_PATH=/app/data/ksg_index.json
+      - NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=${NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}
     volumes:
       - ./data:/app/data
     ports:

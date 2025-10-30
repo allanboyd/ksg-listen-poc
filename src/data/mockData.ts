@@ -1,9 +1,59 @@
-export const campuses = [
-  { id: "nairobi", name: "Nairobi", lat: -1.2921, lon: 36.8219 },
-  { id: "mombasa", name: "Mombasa", lat: -4.0435, lon: 39.6682 },
-  { id: "baringo", name: "Baringo", lat: 0.4667, lon: 35.9667 },
-  { id: "embu", name: "Embu", lat: -0.5326, lon: 37.459 },
-  { id: "matuga", name: "Matuga", lat: -4.335, lon: 39.56 },
+export type Campus = {
+  id: string;
+  name: string;
+  lat: number;
+  lon: number; // kept for backwards compatibility
+  lng: number; // used by Google Maps
+  address?: string;
+  placeId?: string;
+};
+
+export const campuses: Campus[] = [
+  {
+    id: "nairobi",
+    name: "Nairobi",
+    lat: -1.2921,
+    lon: 36.8219,
+    lng: 36.8219,
+    address: "KSG Nairobi Campus, Lower Kabete Rd, Nairobi, Kenya",
+    placeId: "ChIJp0lN2HIRLxgR6h8S0-Example",
+  },
+  {
+    id: "mombasa",
+    name: "Mombasa",
+    lat: -4.0435,
+    lon: 39.6682,
+    lng: 39.6682,
+    address: "KSG Mombasa Campus, Mbaraki Rd, Mombasa, Kenya",
+    placeId: "ChIJt2fJxW3nPBkR7h8S0-Example",
+  },
+  {
+    id: "baringo",
+    name: "Baringo",
+    lat: 0.4667,
+    lon: 35.9667,
+    lng: 35.9667,
+    address: "KSG Baringo Campus, Kabarnet, Kenya",
+    placeId: "ChIJl3bNf2V5FhkR8h8S0-Example",
+  },
+  {
+    id: "embu",
+    name: "Embu",
+    lat: -0.5326,
+    lon: 37.459,
+    lng: 37.459,
+    address: "KSG Embu Campus, Embu, Kenya",
+    placeId: "ChIJc7wYcE6_ZxkR9h8S0-Example",
+  },
+  {
+    id: "matuga",
+    name: "Matuga",
+    lat: -4.335,
+    lon: 39.56,
+    lng: 39.56,
+    address: "KSG Matuga Campus, Kwale, Kenya",
+    placeId: "ChIJ0bO3Hc9eQBkR-h8S0-Example",
+  },
 ];
 
 export const now = () => new Date().toLocaleTimeString();
