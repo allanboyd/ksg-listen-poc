@@ -2,7 +2,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Send, AlertTriangle, MessageSquare, Calendar, Globe, ArrowLeft } from "lucide-react";
+import { Send, AlertTriangle, MessageSquare, Calendar, Globe, ArrowLeft, Menu } from "lucide-react";
 import { useSession } from "next-auth/react";
 
 type ChatItem = { id: string; me: string; ai?: string };
@@ -27,6 +27,7 @@ export default function AssistantPage() {
   const [feedback, setFeedback] = useState({ title: "", campus: "", priority: "Normal", location: "" });
   const [feedbackFlow, setFeedbackFlow] = useState<{ active: boolean; step: "idle"|"askFeedback"|"askCampus"|"askAnonymous"; pending: { title: string; campus: string } }>({ active: false, step: "idle", pending: { title: "", campus: "" } });
   const [feedbackSubmitted, setFeedbackSubmitted] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const suggestions = useMemo(() => PROMPTS.filter(p=>p.toLowerCase().includes(text.toLowerCase()) || !text).slice(0,5), [text]);
   const scrollerRef = useRef<HTMLDivElement>(null);
 
@@ -139,31 +140,59 @@ export default function AssistantPage() {
       <div className="pointer-events-none absolute -top-20 -left-20 w-[360px] h-[360px] rounded-full opacity-30 blur-3xl bg-[radial-gradient(circle_at_center,rgba(245,158,11,0.6),transparent_60%)]" />
       <div className="pointer-events-none absolute -bottom-24 -right-24 w-[420px] h-[420px] rounded-full opacity-30 blur-3xl bg-[radial-gradient(circle_at_center,rgba(20,184,166,0.55),transparent_60%)]" />
 
-      {/* Back button (no navbar) */}
-      <Link href="/" className="absolute top-4 left-4 z-50 inline-flex items-center justify-center w-10 h-10 rounded-full text-white shadow-md bg-gradient-to-tr from-[#7F632C] to-[#f59e0b] hover:opacity-95">
-        <ArrowLeft className="w-5 h-5" />
-      </Link>
-
-      {/* Floating title and auth buttons */}
-      <div className="pointer-events-none absolute top-4 left-0 right-0 z-50 flex items-center justify-center">
-        <div className="pointer-events-auto inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/80 backdrop-blur border shadow-sm">
-          <span className="text-sm font-semibold text-gray-900">KSG Assistant</span>
-        </div>
-      </div>
-      <div className="absolute top-4 right-4 z-50 flex items-center gap-2">
-        <Link href="/dashboard" className="hidden sm:inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-white text-xs bg-gradient-to-r from-[#7F632C] to-[#f59e0b] hover:opacity-95">Dashboard</Link>
-        {session?.user ? (
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/80 backdrop-blur border shadow-sm">
-            <div className="w-7 h-7 rounded-full bg-[#7F632C] text-white flex items-center justify-center text-xs font-bold">
-              {(session.user.name || session.user.email || 'U').slice(0,1).toUpperCase()}
+      {/* Top header toolbar */}
+      <div className="z-50 w-full px-4 pt-4 relative">
+        <div className="max-w-6xl mx-auto flex items-center justify-between gap-3">
+          <Link href="/" className="inline-flex items-center justify-center w-10 h-10 rounded-full text-white shadow-md bg-gradient-to-tr from-[#7F632C] to-[#f59e0b] hover:opacity-95">
+            <ArrowLeft className="w-5 h-5" />
+          </Link>
+          <div className="flex-1 flex items-center justify-center">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/80 backdrop-blur border shadow-sm">
+              <span className="text-sm font-semibold text-gray-900">KSG Assistant</span>
             </div>
-            <div className="hidden sm:block text-xs text-gray-800 max-w-[160px] truncate">{session.user.name || session.user.email}</div>
           </div>
-        ) : (
-          <>
-            <Link href="/signin" className="px-3 py-1.5 rounded-md text-white text-xs bg-[#7F632C] hover:bg-[#6a5425]">Sign in</Link>
-            <Link href="/signup" className="px-3 py-1.5 rounded-md text-[#7F632C] text-xs border border-[#7F632C] bg-white hover:bg-[#7F632C]/5">Sign up</Link>
-          </>
+          <div className="flex items-center gap-2">
+            <Link href="/dashboard" className="hidden sm:inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-white text-xs bg-gradient-to-r from-[#7F632C] to-[#f59e0b] hover:opacity-95">Dashboard</Link>
+            {session?.user ? (
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/80 backdrop-blur border shadow-sm">
+                <div className="w-7 h-7 rounded-full bg-[#7F632C] text-white flex items-center justify-center text-xs font-bold">
+                  {(session.user.name || session.user.email || 'U').slice(0,1).toUpperCase()}
+                </div>
+                <div className="hidden sm:block text-xs text-gray-800 max-w-[160px] truncate">{session.user.name || session.user.email}</div>
+              </div>
+            ) : (
+              <div className="hidden sm:flex items-center gap-2">
+                <Link href="/signin" className="px-3 py-1.5 rounded-md text-white text-xs bg-[#7F632C] hover:bg-[#6a5425]">Sign in</Link>
+                <Link href="/signup" className="px-3 py-1.5 rounded-md text-[#7F632C] text-xs border border-[#7F632C] bg-white hover:bg-[#7F632C]/5">Sign up</Link>
+              </div>
+            )}
+            {/* Mobile menu toggle */}
+            <button
+              aria-label="Open menu"
+              onClick={()=>setMenuOpen(v=>!v)}
+              className="sm:hidden inline-flex items-center justify-center w-10 h-10 rounded-full text-white shadow-md bg-gradient-to-tr from-[#7F632C] to-[#f59e0b] hover:opacity-95"
+            >
+              <Menu className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+        {menuOpen && (
+          <div className="sm:hidden absolute left-0 right-0 top-16 px-4">
+            <div className="max-w-6xl mx-auto rounded-xl border bg-white shadow-md overflow-hidden">
+              <a href="/dashboard" onClick={()=>setMenuOpen(false)} className="block px-4 py-3 hover:bg-gray-50">Dashboard</a>
+              {session?.user ? (
+                <div className="border-t px-4 py-3 space-y-1 text-sm">
+                  <div className="font-medium">{session.user.name || session.user.email}</div>
+                  <div className="text-gray-500">{session.user.email}</div>
+                </div>
+              ) : (
+                <>
+                  <a href="/signin" onClick={()=>setMenuOpen(false)} className="block px-4 py-3 hover:bg-gray-50 border-t">Sign in</a>
+                  <a href="/signup" onClick={()=>setMenuOpen(false)} className="block px-4 py-3 hover:bg-gray-50 border-t">Sign up</a>
+                </>
+              )}
+            </div>
+          </div>
         )}
       </div>
 
@@ -179,14 +208,16 @@ export default function AssistantPage() {
       {/* Explore ideas and messages */}
       <div className="grid md:grid-cols-3 gap-6">
         <div className="md:col-span-2 space-y-3">
-          <div className="text-xs uppercase tracking-wide text-gray-500">Explore new ideas</div>
-          <div className="grid sm:grid-cols-3 gap-3">
-            {PROMPTS.slice(0,3).map((p,i)=> (
-              <motion.button key={i} whileHover={{y:-3}} onClick={()=>setText(p)} className="rounded-xl border bg-white p-3 text-left shadow-sm">
-                <div className="text-sm font-medium mb-2">{p}</div>
-                <div className="text-xs text-gray-500 flex items-center gap-1"><MessageSquare className="w-4 h-4"/>Prompt</div>
-              </motion.button>
-            ))}
+          <div className="hidden sm:block">
+            <div className="text-xs uppercase tracking-wide text-gray-500">Explore new ideas</div>
+            <div className="grid sm:grid-cols-3 gap-3 mt-2">
+              {PROMPTS.slice(0,3).map((p,i)=> (
+                <motion.button key={i} whileHover={{y:-3}} onClick={()=>setText(p)} className="rounded-xl border bg-white p-3 text-left shadow-sm">
+                  <div className="text-sm font-medium mb-2">{p}</div>
+                  <div className="text-xs text-gray-500 flex items-center gap-1"><MessageSquare className="w-4 h-4"/>Prompt</div>
+                </motion.button>
+              ))}
+            </div>
           </div>
 
           {/* Messages scroller */}
@@ -211,7 +242,7 @@ export default function AssistantPage() {
             <div className="mt-6 rounded-xl border bg-white p-5 space-y-3">
               <div className="text-sm font-medium">Create feedback ticket</div>
               <div className="grid sm:grid-cols-2 gap-3">
-                <input className="border rounded-md px-3 py-2 text-sm" placeholder="Title" value={feedback.title} onChange={(e)=>setFeedback(f=>({...f,title:e.target.value}))} />
+                <input className="border rounded-md px-3 py-2 text-sm" placeholder="Feedback" value={feedback.title} onChange={(e)=>setFeedback(f=>({...f,title:e.target.value}))} />
                 <input className="border rounded-md px-3 py-2 text-sm" placeholder="Campus" value={feedback.campus} onChange={(e)=>setFeedback(f=>({...f,campus:e.target.value}))} />
                 <select className="border rounded-md px-3 py-2 text-sm" value={feedback.priority} onChange={(e)=>setFeedback(f=>({...f,priority:e.target.value}))}>
                   <option>Low</option>
@@ -251,7 +282,7 @@ export default function AssistantPage() {
             </div>
           )}
         </div>
-        <aside className="space-y-3">
+        <aside className="space-y-3 hidden sm:block">
           <div className="rounded-xl border p-3 bg-white text-sm flex items-start gap-2"><AlertTriangle className="w-4 h-4 text-red-500 mt-0.5"/> Mark messages as urgent to alert admins automatically.</div>
           <div className="rounded-xl border p-3 bg-white text-sm flex items-start gap-2"><Calendar className="w-4 h-4 text-[#7F632C] mt-0.5"/> Pulls details from the training calendar PDF and the KSG site when available.</div>
           <div className="rounded-xl border p-3 bg-white text-sm flex items-start gap-2"><Globe className="w-4 h-4 text-[#7F632C] mt-0.5"/> Try: “Find a leadership course next month in Nairobi”.</div>
@@ -266,7 +297,7 @@ export default function AssistantPage() {
         {/* Brand-styled input (no card wrapper) */}
         <div className="flex items-center gap-2 rounded-xl px-4 py-3 bg-[#7F632C]/5 border border-[#7F632C]/30 shadow-sm">
           <MessageSquare className="w-5 h-5 text-[#7F632C]" />
-          <input className="flex-1 outline-none py-3 text-base bg-transparent placeholder:text-[#7F632C]/60" placeholder={mode==='inquiry' ? 'Ask your inquiry...' : mode==='info' ? 'Ask for general information...' : 'Type a message and press Enter'} value={text} onChange={(e)=>{
+          <input className="flex-1 outline-none py-3 text-base bg-transparent placeholder:text-[#7F632C]/60" placeholder={'Feedback'} value={text} onChange={(e)=>{
             const v = e.target.value;
             setText(v);
             if (/^\s*hi\s*$/i.test(v) || /^\s*hello\s*$/i.test(v)) setMode('menu');
@@ -275,8 +306,8 @@ export default function AssistantPage() {
           <button onClick={send} disabled={loading} className="ml-2 inline-flex items-center gap-1 px-5 py-3 rounded-md text-white bg-gradient-to-r from-[#7F632C] to-[#f59e0b] hover:from-[#6a5425] hover:to-[#d97706] disabled:opacity-50"><Send className="w-4 h-4"/>Send</button>
         </div>
 
-        {/* Suggestions row with brand colors; center highlighted */}
-        <div className="flex flex-wrap justify-center gap-2 mt-4">
+        {/* Suggestions row with brand colors; center highlighted (hidden on mobile) */}
+        <div className="hidden sm:flex flex-wrap justify-center gap-2 mt-4">
           {[
             { text: "Upcoming trainings", cls: "bg-amber-100 text-amber-800" },
             { text: "Venue/trainer info", cls: "bg-teal-100 text-teal-800" },
