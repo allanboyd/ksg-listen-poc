@@ -6,7 +6,7 @@ export const runtime = "nodejs";
 
 export async function GET(_req: NextRequest) {
   try {
-    const p = path.join(process.cwd(), "data", "ksg_index.json");
+    const p = process.env.KSG_INDEX_PATH || path.join(process.cwd(), "data", "ksg_index.json");
     if (!fs.existsSync(p)) return NextResponse.json([]);
     const raw = fs.readFileSync(p, "utf8");
     const data = JSON.parse(raw);

@@ -123,7 +123,7 @@ export async function buildIndex(): Promise<IndexItem[]> {
   const all = [...docItems, ...webItems];
   const apiEnabled = Boolean(process.env.GEMINI_API_KEY);
   const enriched = await enrichWithGemini(all, apiEnabled);
-  const outPath = path.join(process.cwd(), "data", "ksg_index.json");
+  const outPath = process.env.KSG_INDEX_PATH || path.join(process.cwd(), "data", "ksg_index.json");
   ensureDir(outPath);
   fs.writeFileSync(outPath, JSON.stringify(enriched, null, 2), "utf8");
   return enriched;

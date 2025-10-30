@@ -160,7 +160,7 @@ export async function POST(req: NextRequest) {
       useMode !== "docs" ? fetchWebsiteText() : Promise.resolve(""),
     ]);
     // Retrieve top chunks from prebuilt index for precision
-    const indexPath = path.join(process.cwd(), 'data', 'ksg_index.json');
+    const indexPath = process.env.KSG_INDEX_PATH || path.join(process.cwd(), 'data', 'ksg_index.json');
     const retrieved = retrieveTopChunks(indexPath, message, useMode);
     const modeHeader = `Mode: ${useMode}\n- docs => use ONLY public/docs/ksg and training calendar\n- website => use ONLY ksg.ac.ke\n- combined => use both`; 
     const labeled: string[] = [modeHeader];
