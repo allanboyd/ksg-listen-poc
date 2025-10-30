@@ -1,0 +1,15 @@
+version: '3.9'
+services:
+  ksg-next:
+    build: .
+    container_name: ksg-next
+    environment:
+      - NODE_ENV=production
+      - PORT=3030
+      - HOSTNAME=0.0.0.0
+      - DB_FILE=/app/data/app.db
+    volumes:
+      - ./data:/app/data
+    ports:
+      - "3030:3030"
+    restart: unless-stopped
