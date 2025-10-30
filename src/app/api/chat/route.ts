@@ -61,8 +61,17 @@ export async function POST(req: NextRequest) {
       fetchWebsiteText(),
     ]);
     const context = `${website}\n\n${calendar}`.trim();
-    const reply = await chatGemini(message, context);
-    return NextResponse.json({ reply });
+    try {
+      const reply = await chatGemini(message, context);
+      return NextResponse.json({ reply });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      return NextResponse.json({
+        reply:
+          "KSG Assistant could not reach the AI service right now. Your message was received. Please try again shortly.",
+        error: msg,
+      });
+    }
   } catch (error) {
     console.error("Chat API error:", error);
     const msg = error instanceof Error ? error.message : "Unknown error";
