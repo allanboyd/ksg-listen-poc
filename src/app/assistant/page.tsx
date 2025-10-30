@@ -2,7 +2,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Send, AlertTriangle, MessageSquare, Calendar, Globe, ArrowLeft, Menu } from "lucide-react";
+import { Send, AlertTriangle, MessageSquare, Calendar, Globe, ArrowLeft, Menu, Mic } from "lucide-react";
 import { useSession } from "next-auth/react";
 
 type ChatItem = { id: string; me: string; ai?: string };
@@ -30,6 +30,7 @@ export default function AssistantPage() {
   const [menuOpen, setMenuOpen] = useState(false);
   const suggestions = useMemo(() => PROMPTS.filter(p=>p.toLowerCase().includes(text.toLowerCase()) || !text).slice(0,5), [text]);
   const scrollerRef = useRef<HTMLDivElement>(null);
+  const [centerMessages, setCenterMessages] = useState(true);
 
   useEffect(()=>{
     fetch("/api/ai/health").then(r=>r.json()).then(d=>setHealth(d.ok?"ok":"fail")).catch(()=>setHealth("fail"));
@@ -39,6 +40,22 @@ export default function AssistantPage() {
     // Auto-scroll to bottom when new messages arrive
     scrollerRef.current?.scrollTo({ top: scrollerRef.current.scrollHeight, behavior: 'smooth' });
   }, [items, loading]);
+
+  useEffect(()=>{
+    const el = scrollerRef.current;
+    if (!el) return;
+    const check = () => {
+      const client = el.clientHeight || 1;
+      const scroll = el.scrollHeight || 1;
+      setCenterMessages(scroll < client * 0.8);
+    };
+    check();
+    const RO = (window as any).ResizeObserver;
+    const ro = RO ? new RO(check) : null;
+    if (ro) ro.observe(el);
+    const id = window.setInterval(check, 300);
+    return () => { if (ro) ro.disconnect(); window.clearInterval(id); };
+  }, [items]);
 
   async function send() {
     if (!text.trim()) return;
@@ -196,8 +213,8 @@ export default function AssistantPage() {
         )}
       </div>
 
-      {/* Content area: messages */}
-      <div className="w-full flex-1 px-4 pt-6 pb-28 flex justify-center">
+      {/* Content area: messages (scrolls within the screen) */}
+      <div className="w-full flex-1 px-4 pt-6 pb-4 flex justify-center overflow-y-auto">
       <div className="max-w-6xl w-full">
       {/* Greeting */}
       <div className="mb-4">
@@ -207,7 +224,7 @@ export default function AssistantPage() {
 
       {/* Explore ideas and messages */}
       <div className="grid md:grid-cols-3 gap-6">
-        <div className="md:col-span-2 space-y-3">
+        <div className="md:col-span-2 space-y-3 flex flex-col min-h-[60vh]">
           <div className="hidden sm:block">
             <div className="text-xs uppercase tracking-wide text-gray-500">Explore new ideas</div>
             <div className="grid sm:grid-cols-3 gap-3 mt-2">
@@ -220,8 +237,11 @@ export default function AssistantPage() {
             </div>
           </div>
 
-          {/* Messages scroller */}
-          <div ref={scrollerRef} className="mt-6 space-y-3 max-h-[50vh] md:max-h-[60vh] overflow-y-auto pr-1">
+          {/* Messages scroller (centers when short; pushes up as it grows) */}
+          <div
+            ref={scrollerRef}
+            className={`mt-6 pr-1 ${centerMessages ? 'flex flex-col justify-center space-y-3' : 'space-y-3'}`}
+          >
             {items.map((it, i) => (
               <div key={i} className="space-y-2">
                 {it.me && (
@@ -291,8 +311,8 @@ export default function AssistantPage() {
       </div>
       </div>
 
-      {/* Floating input and suggestions at bottom (not fixed) */}
-      <div className="w-full px-4 pb-10 flex justify-center">
+      {/* Bottom input: pinned by flex layout (does not scroll out) */}
+      <div className="w-full px-4 pb-4 flex justify-center">
         <div className="max-w-6xl w-full">
         {/* Brand-styled input (no card wrapper) */}
         <div className="flex items-center gap-2 rounded-xl px-4 py-3 bg-[#7F632C]/5 border border-[#7F632C]/30 shadow-sm">
@@ -302,7 +322,9 @@ export default function AssistantPage() {
             setText(v);
             if (/^\s*hi\s*$/i.test(v) || /^\s*hello\s*$/i.test(v)) setMode('menu');
           }} onKeyDown={(e)=>{ if(e.key==='Enter'){ e.preventDefault(); send(); }}} />
-          <span className={`text-xs px-2 py-1 rounded-full ${health==='ok'?'bg-emerald-100 text-emerald-700':'bg-red-100 text-red-700'}`}>{health==='ok'? 'Gemini · Ready' : 'AI · Error'}</span>
+          <button type="button" aria-label="Voice input" className="inline-flex items-center justify-center w-10 h-10 rounded-md text-[#7F632C] hover:bg-[#7F632C]/10">
+            <Mic className="w-5 h-5" />
+          </button>
           <button onClick={send} disabled={loading} className="ml-2 inline-flex items-center gap-1 px-5 py-3 rounded-md text-white bg-gradient-to-r from-[#7F632C] to-[#f59e0b] hover:from-[#6a5425] hover:to-[#d97706] disabled:opacity-50"><Send className="w-4 h-4"/>Send</button>
         </div>
 
