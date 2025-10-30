@@ -192,7 +192,7 @@ export default function Home() {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[
               { title: "Multi-Channel Access", desc: "Submit feedback or inquiries via WhatsApp, Web, USSD (*727#), SMS, or on-campus kiosks — accessible to all users.", delay: 0, Icon: Globe },
-              { title: "Smart AI Routing", desc: "Powered by Gemini Flash, the system understands messages in Kiswahili & English, detects type and urgency, and routes them instantly to the right office.", delay: 0.05, Icon: Search },
+              { title: "Smart AI Routing", desc: "Powered by AI technologies, the system understands messages in Kiswahili & English, detects type and urgency, and routes them instantly to the right office.", delay: 0.05, Icon: Search },
               { title: "Training-Linked Context", desc: "Connected to the KSG Training Calendar so users can ask about specific courses or share feedback on ongoing and completed programs.", delay: 0.1, Icon: Calendar },
               { title: "KSG Assistant (AI Chat)", desc: "An intuitive chat interface — like ChatGPT — for staff and participants to send feedback or inquiries, anonymously or logged in.", delay: 0.15, Icon: MessageSquare },
               { title: "Urgent Issue Alerts", desc: "Critical messages such as 'trainer absent' or 'safety issue' trigger instant alerts and escalate automatically if unresolved.", delay: 0.2, Icon: AlertTriangle },
