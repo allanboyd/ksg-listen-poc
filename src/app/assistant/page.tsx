@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { Send, AlertTriangle, MessageSquare, Calendar, Globe, ArrowLeft, Menu, Mic } from "lucide-react";
 import { useSession } from "next-auth/react";
 
-type ChatItem = { id: string; me: string; ai?: string };
+type ChatItem = { id: string; me: string; ai?: string; results?: Array<{ title: string; source: string; summary?: string; keywords?: string[]; content?: string }>; suggestions?: string[] };
 type Mode = "menu" | "inquiry" | "info" | "feedback";
 
 const PROMPTS = [
@@ -138,7 +138,7 @@ export default function AssistantPage() {
       const res = await fetch("/api/chat", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ message: me, mode: modeParam }) });
       const data = await res.json().catch(()=>({}));
       const ai = data.reply || data.error || (!res.ok ? `API error: ${res.status}` : "No response received");
-      setItems((arr) => arr.map(m => m.id === id ? { ...m, ai } : m));
+      setItems((arr) => arr.map(m => m.id === id ? { ...m, ai, results: Array.isArray(data.results)? data.results : undefined, suggestions: Array.isArray(data.suggestions)? data.suggestions : undefined } : m));
       // Auto alert admins on urgent text
       if (/\burgent\b|\bemergency\b|\bcritical\b/i.test(me)) {
         fetch("/api/alerts", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "Urgent user message", message: me, priority: "urgent" }) });
@@ -169,7 +169,9 @@ export default function AssistantPage() {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Link href="/dashboard" className="hidden sm:inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-white text-xs bg-gradient-to-r from-[#7F632C] to-[#f59e0b] hover:opacity-95">Dashboard</Link>
+            {session?.user && (
+              <Link href="/dashboard" className="hidden sm:inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-white text-xs bg-gradient-to-r from-[#7F632C] to-[#f59e0b] hover:opacity-95">Dashboard</Link>
+            )}
             {session?.user ? (
               <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/80 backdrop-blur border shadow-sm">
                 <div className="w-7 h-7 rounded-full bg-[#7F632C] text-white flex items-center justify-center text-xs font-bold">
@@ -196,7 +198,9 @@ export default function AssistantPage() {
         {menuOpen && (
           <div className="sm:hidden absolute left-0 right-0 top-16 px-4">
             <div className="max-w-6xl mx-auto rounded-xl border bg-white shadow-md overflow-hidden">
-              <a href="/dashboard" onClick={()=>setMenuOpen(false)} className="block px-4 py-3 hover:bg-gray-50">Dashboard</a>
+              {session?.user && (
+                <a href="/dashboard" onClick={()=>setMenuOpen(false)} className="block px-4 py-3 hover:bg-gray-50">Dashboard</a>
+              )}
               {session?.user ? (
                 <div className="border-t px-4 py-3 space-y-1 text-sm">
                   <div className="font-medium">{session.user.name || session.user.email}</div>
@@ -218,7 +222,7 @@ export default function AssistantPage() {
       <div className="max-w-6xl w-full">
       {/* Greeting */}
       <div className="mb-4">
-        <h1 className="text-2xl font-bold text-gray-900">Hello, {`Guest`}</h1>
+        <h1 className="text-2xl font-bold text-gray-900">Hello, {session?.user ? (session.user.name || session.user.email) : `Guest`}</h1>
         <p className="text-gray-600">How can I help you today?</p>
       </div>
 
@@ -250,8 +254,35 @@ export default function AssistantPage() {
                   </div>
                 )}
                 {it.ai && (
-                  <div className="relative rounded-xl border p-5 min-h-16 bg-white">
+                  <div className="relative rounded-xl border p-5 min-h-16 bg-white space-y-3">
                     <div className="text-sm"><span className="font-medium">Assistant:</span> {it.ai}</div>
+                    {Array.isArray(it.results) && it.results.length>0 && (
+                      <div className="grid sm:grid-cols-2 gap-3">
+                        {it.results.map((r, idx)=> (
+                          <div key={idx} className="rounded-xl border p-3 bg-white/90">
+                            <div className="text-sm font-semibold mb-1 truncate" title={r.title}>{r.title}</div>
+                            <div className="text-xs text-gray-500 truncate" title={r.source}>{r.source}</div>
+                            {r.summary && <div className="text-sm mt-1">{r.summary}</div>}
+                            {Array.isArray(r.keywords) && r.keywords.length>0 && (
+                              <div className="mt-2 flex flex-wrap gap-1">{r.keywords.slice(0,8).map((k,i)=>(<span key={i} className="text-[10px] px-2 py-0.5 rounded-full border">{k}</span>))}</div>
+                            )}
+                            {r.content && (
+                              <details className="text-sm mt-2">
+                                <summary className="cursor-pointer text-[#7F632C]">View details</summary>
+                                <div className="mt-1 max-h-32 overflow-auto whitespace-pre-wrap text-gray-700">{r.content}</div>
+                              </details>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    {Array.isArray(it.suggestions) && it.suggestions.length>0 && (
+                      <div className="flex flex-wrap gap-2">
+                        {it.suggestions.slice(0,8).map((sug, i)=> (
+                          <button key={i} onClick={()=>setText(sug)} className="text-xs px-2 py-1 rounded-full border hover:bg-gray-50">{sug}</button>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 )}
               </div>

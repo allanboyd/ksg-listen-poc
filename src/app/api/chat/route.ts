@@ -93,6 +93,45 @@ async function fetchWebsiteText(): Promise<string> {
   }
 }
 
+function tokenize(s: string): string[] {
+  return s.toLowerCase().replace(/[^a-z0-9\s]/g, " ").split(/\s+/).filter(Boolean);
+}
+
+function scoreChunk(qTokens: string[], text: string): number {
+  const t = tokenize(text);
+  let score = 0;
+  for (const qt of qTokens) {
+    // bonus for exact presence; naive
+    if (t.includes(qt)) score += 2;
+  }
+  // small boost for length to avoid empty
+  return score + Math.min(t.length / 200, 5);
+}
+
+type RetrievedItem = { title: string; source: string; summary?: string; keywords?: string[]; content?: string };
+
+function retrieveTopChunks(indexPath: string, query: string, mode: "docs"|"website"|"combined"): { text: string; items: RetrievedItem[] } {
+  try {
+    if (!fs.existsSync(indexPath)) return { text: "", items: [] };
+    const arr = JSON.parse(fs.readFileSync(indexPath, "utf8"));
+    if (!Array.isArray(arr)) return { text: "", items: [] };
+    const qTokens = tokenize(query).slice(0, 24);
+    const filtered = arr.filter((it:any)=> mode==='combined' ? true : (mode==='docs' ? it.sourceType==='doc' : it.sourceType==='website'));
+    const scored = filtered.map((it:any)=> ({ it, s: scoreChunk(qTokens, `${it.title}\n${it.summary||''}\n${it.content}`) }));
+    scored.sort((a:any,b:any)=> b.s - a.s);
+    const top12 = scored.slice(0, 12);
+    const items: RetrievedItem[] = top12.map((x:any)=> ({
+      title: x.it.title,
+      source: x.it.source,
+      summary: x.it.summary,
+      keywords: Array.isArray(x.it.keywords) ? x.it.keywords.slice(0, 12) : [],
+      content: String(x.it.content||'').slice(0, 2000),
+    }));
+    const text = top12.map((x:any)=> `TITLE: ${x.it.title}\nSOURCE: ${x.it.source}\nSUMMARY: ${x.it.summary||''}\nCONTENT:\n${String(x.it.content||'').slice(0, 2000)}`).join("\n\n---\n\n");
+    return { text, items };
+  } catch { return { text: "", items: [] }; }
+}
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json().catch(() => ({}));
@@ -120,18 +159,34 @@ export async function POST(req: NextRequest) {
       useMode !== "website" ? loadKsgDocsText() : Promise.resolve("") ,
       useMode !== "docs" ? fetchWebsiteText() : Promise.resolve(""),
     ]);
+    // Retrieve top chunks from prebuilt index for precision
+    const indexPath = path.join(process.cwd(), 'data', 'ksg_index.json');
+    const retrieved = retrieveTopChunks(indexPath, message, useMode);
     const modeHeader = `Mode: ${useMode}\n- docs => use ONLY public/docs/ksg and training calendar\n- website => use ONLY ksg.ac.ke\n- combined => use both`; 
     const labeled: string[] = [modeHeader];
     if (website) labeled.push(`WEBSITE CONTEXT (ksg.ac.ke):\n${website}`);
     if (calendar) labeled.push(`CALENDAR CONTEXT (training calendar):\n${calendar}`);
     if (docs) labeled.push(`KSG DOCS CONTEXT (public/docs/ksg):\n${docs}`);
+    if (retrieved.text) labeled.unshift(`RETRIEVED CONTEXT (top chunks from index):\n${retrieved.text}`);
     const rawContext = labeled.join("\n\n").trim();
     const context = rawContext.slice(0, 40_000);
     try {
       const reply = await chatGemini(message, context);
       const greeting = /^(hi|hello|hey)\b/i.test(message.trim());
       const menu = "Hello, what would you like my help with? 1) Make inquiry 2) General information 3) Make feedback";
-      // Build content-based fallback: first page-like snippet from docs/calendar, else random website snippet
+      // Build content-based fallback: prefer retrieved chunks, then docs/calendar, else random website snippet
+      let retrievedSnippet = "";
+      if (retrieved.text) {
+        // take first chunk's content lines
+        const parts = retrieved.text.split("\n\n---\n\n");
+        if (parts.length) {
+          const first = parts[0];
+          // try SUMMARY then CONTENT
+          const sumMatch = /SUMMARY:\n?([^]*?)\nCONTENT:/i.exec(first);
+          const contentMatch = /CONTENT:\n([^]*$)/i.exec(first);
+          retrievedSnippet = (sumMatch?.[1] || contentMatch?.[1] || first).trim().slice(0, 1200);
+        }
+      }
       const firstDocSource = (docs || calendar || "").trim();
       const firstDocSnippet = firstDocSource ? firstDocSource.slice(0, 1400) : "";
       let websiteSnippet = "";
@@ -142,12 +197,23 @@ export async function POST(req: NextRequest) {
           websiteSnippet = pick.slice(0, 600);
         }
       }
-      const contentFallback = firstDocSnippet || websiteSnippet || "";
+      const contentFallback = retrievedSnippet || firstDocSnippet || websiteSnippet || "";
       const fallback = greeting
         ? menu
         : (contentFallback || "I couldn't find a good answer right now. You can choose: 1) Make inquiry (docs), 2) General information (website), or 3) Make feedback.");
       const finalReply = (reply && reply.trim().length > 0) ? reply : fallback;
-      return NextResponse.json({ reply: finalReply });
+      // Build suggestions from top item keywords and titles
+      const suggestionSet = new Set<string>();
+      for (const it of retrieved.items.slice(0, 6)) {
+        if (it.title) suggestionSet.add(it.title);
+        for (const k of it.keywords || []) {
+          if (suggestionSet.size >= 12) break;
+          suggestionSet.add(k);
+        }
+        if (suggestionSet.size >= 12) break;
+      }
+      const suggestions = Array.from(suggestionSet).slice(0, 12);
+      return NextResponse.json({ reply: finalReply, results: retrieved.items.slice(0, 6), suggestions });
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
       return NextResponse.json({

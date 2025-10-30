@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { MessageSquare, Headphones, Bot, Globe2, MapPin, Clock, Radar, Shield, PlusCircle, Sparkles, Wifi, Users, Settings, Bell, ChevronDown, X } from "lucide-react";
+import { MessageSquare, Headphones, Bot, Globe2, MapPin, Clock, Radar, Shield, PlusCircle, Sparkles, Wifi, Users, Settings, Bell, ChevronDown, X, RefreshCw, Database } from "lucide-react";
 import { useSession, signOut } from "next-auth/react";
 import { Badge } from "@/components/ui/badge";
 import { campuses, sampleTickets, currentUser, sentimentByCampus } from "@/data/mockData";
@@ -31,6 +31,10 @@ export default function Dashboard() {
   const [tCategory, setTCategory] = useState("feedback");
   const [tPriority, setTPriority] = useState("Medium");
   const [tLocation, setTLocation] = useState("");
+  const [kbItems, setKbItems] = useState<any[]>([]);
+  const [kbLoading, setKbLoading] = useState(false);
+  const [kbTimer, setKbTimer] = useState(0);
+  const [kbQuery, setKbQuery] = useState("");
 
   const L = useMemo(() => {
     const t: Record<string, any> = {
@@ -55,6 +59,16 @@ export default function Dashboard() {
       if (Array.isArray(d.items)) setTicketItems(d.items);
     }).catch(()=>{});
   },[]);
+
+  React.useEffect(()=>{
+    if (tab !== 'knowledge') return;
+    (async ()=>{
+      try {
+        const d = await fetch('/api/index', { cache: 'no-store' }).then(r=>r.json()).catch(()=>[]);
+        if (Array.isArray(d)) setKbItems(d);
+      } catch {}
+    })();
+  }, [tab]);
 
   return (
     <div className="relative min-h-screen bg-gradient-to-b from-amber-50 via-teal-50 to-white">
@@ -128,8 +142,96 @@ export default function Dashboard() {
                 <TabsTrigger className="text-[#7F632C] data-[state=active]:bg-[#7F632C] data-[state=active]:text-white" value="staff">Staff</TabsTrigger>
                 <TabsTrigger className="text-[#7F632C] data-[state=active]:bg-[#7F632C] data-[state=active]:text-white" value="listening">Social Listening</TabsTrigger>
                 <TabsTrigger className="text-[#7F632C] data-[state=active]:bg-[#7F632C] data-[state=active]:text-white" value="analytics">Analytics</TabsTrigger>
+                <TabsTrigger className="text-[#7F632C] data-[state=active]:bg-[#7F632C] data-[state=active]:text-white" value="knowledge">Knowledge Base</TabsTrigger>
                 <TabsTrigger className="text-[#7F632C] data-[state=active]:bg-[#7F632C] data-[state=active]:text-white" value="settings">Settings</TabsTrigger>
               </TabsList>
+
+              <TabsContent value="knowledge" className="p-6 space-y-4">
+                <div className="flex items-center justify-between">
+                  <SectionTitle icon={Database} title="Knowledge Base" subtitle="Indexed docs and website content" />
+                  <div className="flex items-center gap-2">
+                    <Button disabled={kbLoading} onClick={async()=>{
+                      setKbLoading(true);
+                      setKbTimer(0);
+                      const t = window.setInterval(()=> setKbTimer(v=>v+1), 1000);
+                      try {
+                        await fetch('/api/index/rebuild', { method: 'POST' });
+                        const d = await fetch('/api/index', { cache: 'no-store' }).then(r=>r.json()).catch(()=>[]);
+                        setKbItems(Array.isArray(d)? d : []);
+                      } finally {
+                        window.clearInterval(t);
+                        setKbLoading(false);
+                      }
+                    }} className="bg-[#7F632C] hover:bg-[#6b5424] text-white">
+                      <RefreshCw className="w-4 h-4 mr-2"/>{kbLoading? `Updating… ${kbTimer}s` : 'Update Index'}
+                    </Button>
+                  </div>
+                </div>
+                {kbItems.length === 0 ? (
+                  <Card className="rounded-2xl border border-dashed border-[#7F632C]/30 bg-white/70">
+                    <CardContent className="p-10 text-center space-y-3">
+                      <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-[#7F632C]/10 text-[#7F632C]"><Database className="w-5 h-5"/></div>
+                      <div className="text-lg font-semibold text-gray-900">No knowledge indexed yet</div>
+                      <div className="text-sm text-gray-600">Click Update Index to parse documents and website into the knowledge base.</div>
+                      <div>
+                        <Button disabled={kbLoading} onClick={async()=>{
+                          setKbLoading(true);
+                          setKbTimer(0);
+                          const t = window.setInterval(()=> setKbTimer(v=>v+1), 1000);
+                          try {
+                            await fetch('/api/index/rebuild', { method: 'POST' });
+                            const d = await fetch('/api/index', { cache: 'no-store' }).then(r=>r.json()).catch(()=>[]);
+                            setKbItems(Array.isArray(d)? d : []);
+                          } finally {
+                            window.clearInterval(t);
+                            setKbLoading(false);
+                          }
+                        }} className="bg-[#7F632C] hover:bg-[#6b5424] text-white">
+                          <RefreshCw className="w-4 h-4 mr-2"/>{kbLoading? `Updating… ${kbTimer}s` : 'Update Index'}
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <>
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-2">
+                        <Input value={kbQuery} onChange={e=>setKbQuery(e.target.value)} placeholder="Search title, keywords, or source" className="w-72 bg-white" />
+                        <div className="text-xs text-gray-500">{kbItems.length} items</div>
+                      </div>
+                    </div>
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {kbItems.filter((it:any)=>{
+                        const q = kbQuery.toLowerCase().trim();
+                        if (!q) return true;
+                        const hay = `${it.title||''} ${it.source||''} ${(it.summary||'')} ${(it.keywords||[]).join(' ')}`.toLowerCase();
+                        return hay.includes(q);
+                      }).map((it:any, i:number)=> (
+                        <Card key={it.id || i} className="rounded-2xl border border-[#7F632C]/20 bg-white/90">
+                          <CardHeader className="pb-2">
+                            <CardTitle className="text-base flex items-center gap-2">
+                              <Badge variant="outline" className="uppercase">{it.sourceType}</Badge>
+                              <span className="truncate" title={it.title}>{it.title}</span>
+                            </CardTitle>
+                          </CardHeader>
+                          <CardContent className="space-y-2">
+                            <div className="text-xs text-gray-500 truncate" title={it.source}>{it.source}</div>
+                            {it.summary && <div className="text-sm text-gray-800">{it.summary}</div>}
+                            <div className="flex flex-wrap gap-1">{(it.keywords||[]).slice(0,12).map((k:string, idx:number)=>(<Badge key={idx} variant="outline">{k}</Badge>))}</div>
+                            {it.content && (
+                              <details className="text-sm">
+                                <summary className="cursor-pointer text-[#7F632C]">View content</summary>
+                                <div className="mt-2 max-h-40 overflow-auto whitespace-pre-wrap text-gray-700">{String(it.content).slice(0,4000)}</div>
+                              </details>
+                            )}
+                            <div className="text-xs text-gray-500">Updated: {it.updatedAt ? new Date(it.updatedAt).toLocaleString() : '-'}</div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </TabsContent>
 
               <TabsContent value="overview" className="p-6 grid lg:grid-cols-5 gap-6">
                 <div className="lg:col-span-3 space-y-6">
