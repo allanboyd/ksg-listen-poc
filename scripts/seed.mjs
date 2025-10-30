@@ -24,6 +24,17 @@ db.exec(`
     created_at INTEGER NOT NULL DEFAULT (strftime('%s','now')),
     FOREIGN KEY(role_id) REFERENCES roles(id)
   );
+  CREATE TABLE IF NOT EXISTS tickets (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title TEXT NOT NULL,
+    campus TEXT NOT NULL,
+    category TEXT NOT NULL,
+    priority TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'Open',
+    location TEXT DEFAULT '',
+    created_by INTEGER,
+    created_at INTEGER NOT NULL DEFAULT (strftime('%s','now'))
+  );
 `);
 
 const roleNames = ['administrator','staff','participants','student'];

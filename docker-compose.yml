@@ -1,7 +1,21 @@
 services:
   ksg-next:
-    build: .
+    build:
+      context: .
+      args:
+        GEMINI_API_KEY: ${GEMINI_API_KEY}
+        NEXTAUTH_URL: ${NEXTAUTH_URL}
+        NEXTAUTH_SECRET: ${NEXTAUTH_SECRET}
+        MAIL_HOST: ${MAIL_HOST}
+        MAIL_PORT: ${MAIL_PORT}
+        MAIL_SCHEME: ${MAIL_SCHEME}
+        MAIL_USERNAME: ${MAIL_USERNAME}
+        MAIL_PASSWORD: ${MAIL_PASSWORD}
+        MAIL_FROM_ADDRESS: ${MAIL_FROM_ADDRESS}
+        ALERT_TO: ${ALERT_TO}
     container_name: ksg-next
+    env_file:
+      - .env.local
     environment:
       - NODE_ENV=production
       - PORT=3030

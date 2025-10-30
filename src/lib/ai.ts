@@ -6,7 +6,7 @@ export async function chatGemini(prompt: string, context?: string) {
     contents: [
       { role: "user", parts: [{ text: context ? `${context}\n\nUser: ${prompt}` : prompt }] },
     ],
-    systemInstruction: {
+    system_instruction: {
       role: "system",
       parts: [
         {
@@ -17,17 +17,30 @@ export async function chatGemini(prompt: string, context?: string) {
     },
   };
 
-  const res = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
-    { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) }
-  );
-  if (!res.ok) {
-    let detail = "";
-    try { detail = await res.text(); } catch {}
-    throw new Error(`Gemini error ${res.status}${detail ? ": "+detail : ""}`);
+  // Prefer v1 endpoint and latest model aliases; fall back to commonly available names
+  const modelCandidates = [
+    "gemini-1.5-flash-latest",
+    "gemini-1.5-flash",
+    "gemini-1.5-flash-8b",
+    "gemini-1.5-pro-latest",
+    "gemini-1.5-pro",
+  ];
+  let lastErrText = "";
+  for (const model of modelCandidates) {
+    const url = `https://generativelanguage.googleapis.com/v1/models/${model}:generateContent?key=${apiKey}`;
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      return data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+    }
+    try { lastErrText = await res.text(); } catch {}
+    // try next model
   }
-  const data = await res.json();
-  return data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+  throw new Error(`Gemini error: all model candidates failed${lastErrText ? ": "+lastErrText : ""}`);
 }
 
 
