@@ -21,6 +21,7 @@ services:
       - PORT=3030
       - HOSTNAME=0.0.0.0
       - DB_FILE=/app/data/app.db
+      - KSG_INDEX_PATH=/app/data/ksg_index.json
     volumes:
       - ./data:/app/data
     ports:
