@@ -75,6 +75,9 @@ export default function Dashboard() {
             <button className="relative inline-flex items-center justify-center w-9 h-9 rounded-full bg-[#7F632C]/10 text-[#7F632C] hover:bg-[#7F632C]/15">
               <Bell className="w-4 h-4" />
             </button>
+            <a href="/assistant" className="relative inline-flex items-center justify-center w-9 h-9 rounded-full bg-gradient-to-tr from-[#7F632C] to-[#f59e0b] text-white hover:opacity-95" title="KSG Assistant">
+              <MessageSquare className="w-4 h-4" />
+            </a>
             <button className="relative inline-flex items-center justify-center w-9 h-9 rounded-full bg-[#7F632C]/10 text-[#7F632C] hover:bg-[#7F632C]/15">
               <Settings className="w-4 h-4" />
             </button>

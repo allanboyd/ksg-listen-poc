@@ -6,6 +6,14 @@ export const roles = sqliteTable("roles", {
   createdAt: integer("created_at").notNull().default(Math.floor(Date.now() / 1000)),
 });
 
+export const campusesTable = sqliteTable("campuses", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull().unique(),
+  lat: text("lat").notNull(),
+  lon: text("lon").notNull(),
+  createdAt: integer("created_at").notNull().default(Math.floor(Date.now() / 1000)),
+});
+
 export const users = sqliteTable("users", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   name: text("name"),
@@ -25,6 +33,18 @@ export const tickets = sqliteTable("tickets", {
   status: text("status").notNull().default("Open"),
   location: text("location").default(''),
   createdBy: integer("created_by"),
+  createdAt: integer("created_at").notNull().default(Math.floor(Date.now() / 1000)),
+});
+
+export const trainingPrograms = sqliteTable("training_programs", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  title: text("title").notNull(),
+  campusId: text("campus_id").references(() => campusesTable.id),
+  paymentStatus: integer("payment_status", { mode: 'boolean' }).notNull().default(false),
+  paymentAmount: integer("payment_amount").notNull().default(0),
+  dateText: text("date_text"),
+  source: text("source").notNull().default("pdf"),
+  
   createdAt: integer("created_at").notNull().default(Math.floor(Date.now() / 1000)),
 });
 

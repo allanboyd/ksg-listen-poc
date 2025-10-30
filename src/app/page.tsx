@@ -59,6 +59,7 @@ export default function Home() {
             priority
             className="object-contain object-right lg:object-center opacity-50 scale-110"
           />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/5 to-transparent" />
         </div>
         {/* colorful ambient blobs */}
         <div className="pointer-events-none absolute -top-20 -left-20 w-[420px] h-[420px] rounded-full opacity-30 blur-3xl bg-[radial-gradient(circle_at_center,rgba(245,158,11,0.6),transparent_60%)]" />
@@ -94,6 +95,7 @@ export default function Home() {
                       fill 
                       className="object-cover"
                     />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-black/10 to-transparent" />
                   </div>
                 </div>
                 <div className="col-span-1 space-y-4">
@@ -104,6 +106,7 @@ export default function Home() {
                       fill 
                       className="object-cover"
                     />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-black/10 to-transparent" />
                   </div>
                   <div className="relative h-40 rounded-2xl overflow-hidden shadow-lg">
                     <Image 
@@ -112,6 +115,7 @@ export default function Home() {
                       fill 
                       className="object-cover"
                     />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-black/10 to-transparent" />
                   </div>
                 </div>
               </div>
@@ -127,6 +131,7 @@ export default function Home() {
             <div className="relative">
               <div className="relative rounded-3xl overflow-hidden shadow-xl h-[420px]">
                 <Image src="/images/ksg_training_4.png" alt="KSG team" fill className="object-cover" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-black/10 to-transparent" />
               </div>
               <div className="absolute -bottom-6 -left-4 bg-teal-600 text-white rounded-2xl shadow-lg px-5 py-4 flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-white/20 grid place-items-center">
@@ -139,6 +144,7 @@ export default function Home() {
               </div>
               <div className="absolute -right-4 -bottom-10 w-48 h-40 rounded-2xl overflow-hidden shadow-xl border border-white/60 bg-white">
                 <Image src="/images/ksg_training_5.png" alt="KSG discussion" fill className="object-cover" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-black/10 to-transparent" />
               </div>
             </div>
 
