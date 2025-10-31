@@ -23,7 +23,6 @@ services:
       - HOSTNAME=0.0.0.0
       - DB_FILE=/app/data/app.db
       - KSG_INDEX_PATH=/app/data/ksg_index.json
-      - NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=${NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}
     volumes:
       - ./data:/app/data
     ports:

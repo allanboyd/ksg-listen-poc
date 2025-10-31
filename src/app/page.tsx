@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
-import { Search, LogIn, MessageSquare, Mail, Smartphone, Globe, QrCode, Phone, ArrowRight, Users, TrendingUp, Clock, Award, Star, Facebook, Twitter, Linkedin, Instagram, Youtube, CheckCircle, Calendar, AlertTriangle, BarChart3 } from "lucide-react";
+import { Search, LogIn, MessageSquare, Mail, Smartphone, Globe, QrCode, Phone, ArrowRight, Users, TrendingUp, Clock, Award, Star, Facebook, Twitter, Linkedin, Instagram, Youtube, CheckCircle, Calendar, AlertTriangle, BarChart3, ArrowUp } from "lucide-react";
 
 export default function Home() {
   const [scrolled, setScrolled] = useState(false);
@@ -480,6 +480,15 @@ export default function Home() {
           </div>
         </div>
       </footer>
+      {scrolled && (
+        <button
+          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+          aria-label="Scroll to top"
+          className="fixed bottom-6 right-6 w-12 h-12 rounded-full bg-[#7F632C] text-white shadow-lg hover:bg-[#6a5425] transition grid place-items-center"
+        >
+          <ArrowUp className="w-5 h-5" />
+        </button>
+      )}
     </div>
   );
 }
