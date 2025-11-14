@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import { Nunito } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
 import Providers from "./Providers";
 
-const nunito = Nunito({
+const inter = Inter({
   subsets: ["latin"],
-  variable: "--font-nunito",
+  variable: "--font-inter",
   weight: ["300", "400", "500", "600", "700", "800", "900"],
   display: "swap",
 });
@@ -23,7 +23,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${nunito.variable} antialiased min-h-screen bg-white overflow-x-hidden`}
+        className={`${inter.variable} antialiased min-h-screen bg-white overflow-x-hidden`}
       >
         <Providers>
           {children}

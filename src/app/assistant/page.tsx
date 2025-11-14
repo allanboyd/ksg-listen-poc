@@ -17,6 +17,14 @@ const PROMPTS = [
   "Is there a course on leadership next quarter?",
 ];
 
+const CAMPUS_OPTIONS = [
+  { id: "nairobi", name: "Nairobi" },
+  { id: "mombasa", name: "Mombasa" },
+  { id: "baringo", name: "Baringo" },
+  { id: "embu", name: "Embu" },
+  { id: "matuga", name: "Matuga" },
+];
+
 export default function AssistantPage() {
   const { data: session } = useSession();
   const [text, setText] = useState("");
@@ -38,8 +46,13 @@ export default function AssistantPage() {
   },[]);
 
   useEffect(()=>{
-    // Auto-scroll to bottom when new messages arrive
-    scrollerRef.current?.scrollTo({ top: scrollerRef.current.scrollHeight, behavior: 'smooth' });
+    const el = scrollerRef.current;
+    if (!el) return;
+    const target = el.scrollHeight - el.clientHeight;
+    el.scrollTo({
+      top: target > 0 ? target : 0,
+      behavior: items.length > 1 ? "smooth" : "auto",
+    });
   }, [items, loading]);
 
   useEffect(()=>{
@@ -48,7 +61,7 @@ export default function AssistantPage() {
     const check = () => {
       const client = el.clientHeight || 1;
       const scroll = el.scrollHeight || 1;
-      setCenterMessages(scroll < client * 0.8);
+      setCenterMessages(scroll <= client + 8);
     };
     check();
     const RO = (window as any).ResizeObserver;
@@ -77,7 +90,12 @@ export default function AssistantPage() {
       if (feedbackFlow.step === "askFeedback") {
         const title = me.trim();
         // detect campus keywords
-        const campusMap: Record<string,string> = { nairobi: "nairobi", mombasa: "mombasa", baringo: "baringo", embu: "embu", matuga: "matuga" };
+        const campusMap = CAMPUS_OPTIONS.reduce<Record<string, string>>((acc, campus) => {
+          acc[campus.id] = campus.id;
+          const key = campus.name.toLowerCase();
+          acc[key] = campus.id;
+          return acc;
+        }, {});
         const found = Object.keys(campusMap).find(k => new RegExp(`\\b${k}\\b`, 'i').test(title));
         const campus = found ? campusMap[found] : "";
         const msgs: ChatItem[] = [{ id, me }];
@@ -182,7 +200,7 @@ export default function AssistantPage() {
               </div>
             ) : (
               <div className="hidden sm:flex items-center gap-2">
-                <Link href="/signin" className="px-3 py-1.5 rounded-md text-white text-xs bg-[#7F632C] hover:bg-[#6a5425]">Sign in</Link>
+                <Link href="/signin" className="px-3 py-1.5 rounded-md text-white text-xs bg-[#7F632C] hover:bg-[#7F632C]">Sign in</Link>
                 <Link href="/signup" className="px-3 py-1.5 rounded-md text-[#7F632C] text-xs border border-[#7F632C] bg-white hover:bg-[#7F632C]/5">Sign up</Link>
               </div>
             )}
@@ -219,7 +237,7 @@ export default function AssistantPage() {
       </div>
 
       {/* Content area: messages (scrolls within the screen) */}
-      <div className="w-full flex-1 px-4 pt-6 pb-4 flex justify-center overflow-y-auto">
+      <div ref={scrollerRef} className="w-full flex-1 px-4 pt-6 pb-4 flex justify-center overflow-y-auto">
       <div className="max-w-6xl w-full">
       {/* Greeting */}
       <div className="mb-4">
@@ -244,7 +262,6 @@ export default function AssistantPage() {
 
           {/* Messages scroller (centers when short; pushes up as it grows) */}
           <div
-            ref={scrollerRef}
             className={`mt-6 pr-1 ${centerMessages ? 'flex flex-col justify-center space-y-3' : 'space-y-3'}`}
           >
             {items.map((it, i) => (
@@ -303,7 +320,18 @@ export default function AssistantPage() {
               <div className="text-sm font-medium">Create feedback ticket</div>
               <div className="grid sm:grid-cols-2 gap-3">
                 <input className="border rounded-md px-3 py-2 text-sm" placeholder="Feedback" value={feedback.title} onChange={(e)=>setFeedback(f=>({...f,title:e.target.value}))} />
-                <input className="border rounded-md px-3 py-2 text-sm" placeholder="Campus" value={feedback.campus} onChange={(e)=>setFeedback(f=>({...f,campus:e.target.value}))} />
+                <select
+                  className="border rounded-md px-3 py-2 text-sm bg-white"
+                  value={feedback.campus}
+                  onChange={(e)=>setFeedback(f=>({...f, campus: e.target.value}))}
+                >
+                  <option value="">Select campus</option>
+                  {CAMPUS_OPTIONS.map((campus) => (
+                    <option key={campus.id} value={campus.id}>
+                      {campus.name}
+                    </option>
+                  ))}
+                </select>
                 <select className="border rounded-md px-3 py-2 text-sm" value={feedback.priority} onChange={(e)=>setFeedback(f=>({...f,priority:e.target.value}))}>
                   <option>Low</option>
                   <option>Normal</option>
@@ -365,7 +393,7 @@ export default function AssistantPage() {
           <button type="button" aria-label="Voice input" className="inline-flex items-center justify-center w-10 h-10 rounded-md text-[#7F632C] hover:bg-[#7F632C]/10">
             <Mic className="w-5 h-5" />
           </button>
-          <button onClick={send} disabled={loading} className="ml-2 inline-flex items-center gap-1 px-5 py-3 rounded-md text-white bg-gradient-to-r from-[#7F632C] to-[#f59e0b] hover:from-[#6a5425] hover:to-[#d97706] disabled:opacity-50"><Send className="w-4 h-4"/>Send</button>
+          <button onClick={send} disabled={loading} className="ml-2 inline-flex items-center gap-1 px-5 py-3 rounded-md text-white bg-gradient-to-r from-[#7F632C] to-[#f59e0b] hover:from-[#7F632C] hover:to-[#d97706] disabled:opacity-50"><Send className="w-4 h-4"/>Send</button>
         </div>
 
         {/* Suggestions row with brand colors; center highlighted (hidden on mobile) */}

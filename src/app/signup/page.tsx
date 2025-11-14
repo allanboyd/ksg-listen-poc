@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Eye, EyeOff } from "lucide-react";
 
 export default function SignUp(){
   const router = useRouter();
@@ -12,6 +12,7 @@ export default function SignUp(){
   const [role,setRole]=useState("participants");
   const [error,setError]=useState<string | null>(null);
   const [loading,setLoading]=useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   async function submit(e:React.FormEvent){
     e.preventDefault();
@@ -41,7 +42,7 @@ export default function SignUp(){
       </Link>
       <div className="pointer-events-none absolute -top-20 -left-20 w-[320px] h-[320px] rounded-full opacity-30 blur-3xl bg-[radial-gradient(circle_at_center,rgba(245,158,11,0.6),transparent_60%)]" />
       <div className="pointer-events-none absolute -bottom-24 -right-24 w-[380px] h-[380px] rounded-full opacity-30 blur-3xl bg-[radial-gradient(circle_at_center,rgba(20,184,166,0.55),transparent_60%)]" />
-      <Link href="/assistant" className="absolute top-4 right-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-white text-xs bg-[#7F632C] hover:bg-[#6a5425]">KSG Assistant</Link>
+      <Link href="/assistant" className="absolute top-4 right-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-white text-xs bg-[#7F632C] hover:bg-[#7F632C]">KSG Assistant</Link>
       <form onSubmit={submit} className="relative w-full max-w-md space-y-5 bg-white rounded-2xl p-6 shadow-sm">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
@@ -61,7 +62,23 @@ export default function SignUp(){
             </div>
             <div className="space-y-1">
               <label className="text-sm font-medium text-gray-700">Password</label>
-              <input type="password" className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#7F632C]/30" placeholder="••••••••" value={password} onChange={e=>setPassword(e.target.value)} />
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  className="w-full border rounded-lg px-3 py-2 pr-10 focus:outline-none focus:ring-2 focus:ring-[#7F632C]/30"
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={e=>setPassword(e.target.value)}
+                />
+                <button
+                  type="button"
+                  onClick={()=>setShowPassword(v=>!v)}
+                  className="absolute inset-y-0 right-2 flex items-center text-gray-500 hover:text-[#7F632C] transition"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
+              </div>
             </div>
             <div className="space-y-1">
               <label className="text-sm font-medium text-gray-700">Role</label>

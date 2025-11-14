@@ -42,7 +42,7 @@ export default function Home() {
             <Link href="/signin" className="p-2 text-gray-700 hover:text-[#7F632C] transition" title="Sign in">
               <LogIn className="w-5 h-5" />
             </Link>
-            <Link href="/assistant" className="px-4 py-2 rounded-md text-white bg-[#7F632C] hover:bg-[#6a5425] transition">Add Feedback</Link>
+            <Link href="/assistant" className="px-4 py-2 rounded-md text-white bg-[#7F632C] hover:bg-[#7F632C] transition">Add Feedback</Link>
           </div>
             </div>
           </div>
@@ -77,7 +77,7 @@ export default function Home() {
                 KSG LISTEN is an AI-powered, mobile-first platform that enables participants, staff, and students to send feedback or make inquiries about upcoming, ongoing, or completed training programs — all through WhatsApp, web, USSD, or kiosk. It auto-categorizes, prioritizes, and routes inquiries to the right department in seconds, ensuring rapid, transparent responses.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
-                <Link href="/assistant" className="px-6 py-3 rounded-md text-white bg-gradient-to-r from-[#7F632C] to-[#f59e0b] hover:from-[#6a5425] hover:to-[#d97706] transition inline-flex items-center gap-2 shadow">
+                <Link href="/assistant" className="px-6 py-3 rounded-md text-white bg-gradient-to-r from-[#7F632C] to-[#f59e0b] hover:from-[#7F632C] hover:to-[#d97706] transition inline-flex items-center gap-2 shadow">
                   Try the KSG Assistant <ArrowRight className="w-5 h-5" />
                 </Link>
                 <Link href="/signin" className="px-6 py-3 rounded-md border-2 border-[#7F632C] text-[#7F632C] hover:bg-[#7F632C]/10 transition">
@@ -133,7 +133,7 @@ export default function Home() {
                 <Image src="/images/ksg_training_4.png" alt="KSG team" fill className="object-cover" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-black/10 to-transparent" />
               </div>
-              <div className="absolute -bottom-6 -left-4 bg-teal-600 text-white rounded-2xl shadow-lg px-5 py-4 flex items-center gap-3">
+              <div className="absolute -bottom-6 -left-4 bg-[#7F632C] text-white rounded-2xl shadow-lg px-5 py-4 flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-white/20 grid place-items-center">
                   <Users className="w-5 h-5" />
                 </div>
@@ -155,21 +155,21 @@ export default function Home() {
 
               <div className="space-y-4">
                 <div className="rounded-2xl border border-gray-200 bg-white/70 backdrop-blur-sm shadow-sm p-5 flex items-start gap-4">
-                  <div className="w-11 h-11 rounded-xl bg-cyan-600 text-white grid place-items-center shrink-0"><MessageSquare className="w-5 h-5"/></div>
+                  <div className="w-11 h-11 rounded-xl bg-[#7F632C] text-white grid place-items-center shrink-0"><MessageSquare className="w-5 h-5"/></div>
                   <div>
                     <div className="font-semibold text-gray-900">Unified Conversations</div>
                     <div className="text-sm text-gray-700">Chats and feedback from WhatsApp, Web, USSD, SMS, and kiosks in one place.</div>
                   </div>
                 </div>
                 <div className="rounded-2xl border border-gray-200 bg-white/70 backdrop-blur-sm shadow-sm p-5 flex items-start gap-4">
-                  <div className="w-11 h-11 rounded-xl bg-emerald-600 text-white grid place-items-center shrink-0"><CheckCircle className="w-5 h-5"/></div>
+                  <div className="w-11 h-11 rounded-xl bg-[#7F632C] text-white grid place-items-center shrink-0"><CheckCircle className="w-5 h-5"/></div>
                   <div>
                     <div className="font-semibold text-gray-900">Accountability & SLAs</div>
                     <div className="text-sm text-gray-700">Auto-routing with timers ensures nothing is missed and responses stay timely.</div>
                   </div>
                 </div>
                 <div className="rounded-2xl border border-gray-200 bg-white/70 backdrop-blur-sm shadow-sm p-5 flex items-start gap-4">
-                  <div className="w-11 h-11 rounded-xl bg-indigo-600 text-white grid place-items-center shrink-0"><BarChart3 className="w-5 h-5"/></div>
+                  <div className="w-11 h-11 rounded-xl bg-[#7F632C] text-white grid place-items-center shrink-0"><BarChart3 className="w-5 h-5"/></div>
                   <div>
                     <div className="font-semibold text-gray-900">Insights that Improve Training</div>
                     <div className="text-sm text-gray-700">Live charts and trends turn feedback into action for better delivery.</div>
@@ -220,7 +220,7 @@ export default function Home() {
           </div>
 
           <div className="text-center mt-10">
-            <Link href="/dashboard" className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#7F632C] text-white hover:bg-[#6a5425] transition">Explore the dashboard <ArrowRight className="w-5 h-5" /></Link>
+            <Link href="/dashboard" className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#7F632C] text-white hover:bg-[#7F632C] transition">Explore the dashboard <ArrowRight className="w-5 h-5" /></Link>
           </div>
         </div>
       </section>
@@ -391,7 +391,7 @@ export default function Home() {
                 placeholder="Enter your email address" 
                 className="flex-1 px-4 py-3 rounded-md text-gray-900 border-0 focus:outline-none focus:ring-2 focus:ring-[#7F632C]"
               />
-              <button className="px-8 py-3 rounded-md text-white bg-[#7F632C] hover:bg-[#6a5425] transition">
+              <button className="px-8 py-3 rounded-md text-white bg-[#7F632C] hover:bg-[#7F632C] transition">
                 Subscribe
               </button>
           </div>
@@ -484,7 +484,7 @@ export default function Home() {
         <button
           onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
           aria-label="Scroll to top"
-          className="fixed bottom-6 right-6 w-12 h-12 rounded-full bg-[#7F632C] text-white shadow-lg hover:bg-[#6a5425] transition grid place-items-center"
+          className="fixed bottom-6 right-6 w-12 h-12 rounded-full bg-[#7F632C] text-white shadow-lg hover:bg-[#7F632C] transition grid place-items-center"
         >
           <ArrowUp className="w-5 h-5" />
         </button>

@@ -5,7 +5,7 @@
 :root {
   --background: #ffffff;
   --foreground: #1f2937;
-  --font-nunito: 'Nunito', sans-serif;
+  --font-inter: 'Inter', sans-serif;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -16,11 +16,11 @@
 }
 
 * {
-  font-family: var(--font-nunito), system-ui, -apple-system, sans-serif;
+  font-family: var(--font-inter), system-ui, -apple-system, sans-serif;
 }
 
 body {
-  font-family: var(--font-nunito), system-ui, -apple-system, sans-serif;
+  font-family: var(--font-inter), system-ui, -apple-system, sans-serif;
   color: var(--foreground);
   background: var(--background);
 }

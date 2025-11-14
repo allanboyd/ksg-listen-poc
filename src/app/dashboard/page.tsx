@@ -162,7 +162,7 @@ export default function Dashboard() {
                         window.clearInterval(t);
                         setKbLoading(false);
                       }
-                    }} className="bg-[#7F632C] hover:bg-[#6b5424] text-white">
+                    }} className="bg-[#7F632C] hover:bg-[#7F632C] text-white">
                       <RefreshCw className="w-4 h-4 mr-2"/>{kbLoading? `Updating… ${kbTimer}s` : 'Update Index'}
                     </Button>
                   </div>
@@ -186,7 +186,7 @@ export default function Dashboard() {
                             window.clearInterval(t);
                             setKbLoading(false);
                           }
-                        }} className="bg-[#7F632C] hover:bg-[#6b5424] text-white">
+                        }} className="bg-[#7F632C] hover:bg-[#7F632C] text-white">
                           <RefreshCw className="w-4 h-4 mr-2"/>{kbLoading? `Updating… ${kbTimer}s` : 'Update Index'}
                         </Button>
                       </div>
@@ -265,7 +265,7 @@ export default function Dashboard() {
               <TabsContent value="tickets" className="p-6 space-y-4">
                 <div className="flex items-center justify-between">
                   <SectionTitle icon={MessageSquare} title="Tickets & SLAs" subtitle="Assign, triage, collaborate" />
-                  <Button onClick={()=>setShowTicketModal(true)} className="bg-[#7F632C] hover:bg-[#6b5424] text-white"><PlusCircle className="w-4 h-4 mr-2"/>Create Ticket</Button>
+                  <Button onClick={()=>setShowTicketModal(true)} className="bg-[#7F632C] hover:bg-[#7F632C] text-white"><PlusCircle className="w-4 h-4 mr-2"/>Create Ticket</Button>
                 </div>
                 <Card className="rounded-2xl border border-[#7F632C]/20">
                   <CardContent className="p-0 overflow-x-auto">
@@ -318,7 +318,7 @@ export default function Dashboard() {
                         <Button onClick={async()=>{
                           const res = await fetch('/api/tickets', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ title: tTitle, campus: tCampus, category: tCategory, priority: tPriority, description: tDesc, location: tLocation }) });
                           if(res.ok){ setShowTicketModal(false); setTTitle(''); setTDesc(''); setTLocation(''); const d = await fetch('/api/tickets').then(r=>r.json()).catch(()=>({items:[]})); setTicketItems(d.items||[]);}  
-                        }} className="bg-[#7F632C] hover:bg-[#6b5424] text-white">Create</Button>
+                        }} className="bg-[#7F632C] hover:bg-[#7F632C] text-white">Create</Button>
                       </div>
                     </div>
                   </div>
